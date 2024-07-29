@@ -249,7 +249,9 @@ function showFunctions()
 function showSeatsMap() {
     let dropdowns = document.getElementById('functions-info');
 
-    dropdowns.innerHTML += '<h4>PANTALLA</h4>';
+    let title = document.createElement('h4');
+    title.textContent = 'PANTALLA';
+    dropdowns.appendChild(title);
     
     let seatsMapDiv = document.createElement('div');
     seatsMapDiv.className = 'seat-map';
@@ -260,13 +262,18 @@ function showSeatsMap() {
             seatCheckbox.type = 'checkbox';
             seatCheckbox.className = 'seat-checkbox';
             seatCheckbox.id = `seat-${i}-${j}`;
-            seatCheckbox.addEventListener('click', handleSeatSelection);
+            seatCheckbox.addEventListener('change', handleSeatSelection);
             seatsMapDiv.appendChild(seatCheckbox);
         }
     }
     
     dropdowns.appendChild(seatsMapDiv);
-    dropdowns.innerHTML += '<button class="btn btn-primary mt-3" onclick="showSummary()">Continuar</button>';
+
+    let button = document.createElement('button');
+    button.className = 'btn btn-primary mt-3';
+    button.setAttribute('onclick', 'showSummary()');
+    button.textContent = 'Continuar';
+    dropdowns.appendChild(button);
 }
 
 function handleSeatSelection(event) {
