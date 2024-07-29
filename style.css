@@ -1,0 +1,103 @@
+/* reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* body */
+body {
+    font-family: Roboto, sans-serif;
+    background-color: #F5F5F5;
+}
+
+/* header */
+header {
+    background-color: #333333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #F5F5F5;
+    font-size: 32px;
+    padding: 10px 10px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 50px;
+}
+
+/* footer */
+footer {
+    background-color: #333333;
+    margin-top: 10px;
+    padding: 5px;
+}
+
+footer p {
+    color: #F5F5F5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+/* content */
+#client-name {
+    width: 25px;
+    margin: 0 auto;
+    display: block;
+}
+
+#content {
+    text-align: center;
+}
+
+#content h4 {
+    text-align: center;
+    width: 100%;
+}
+
+#cards-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 80%;
+    margin: 10px 10% 10px 10%
+}
+
+.card {
+    cursor: pointer;
+}
+
+#dropdowns-container {
+    display: block;
+    justify-content: center;
+    width: 80%;
+    margin: 10px 10% 10px 10px
+}
+
+.dropdown {
+    display: flex;
+    justify-content: left;
+    margin: 10px;
+}
+
+.seat-map {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.seat-checkbox {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 5px;
+}
