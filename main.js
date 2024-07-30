@@ -16,14 +16,14 @@ class Movie {
 }
 
 class TicketPurchase {
-    constructor()
+    constructor(name, movie, day, time, tickets, seats)
     {
-        this.clientName = null;
-        this.selectedMovie = null;
-        this.selectedDay = null;
-        this.selectedTime = null;
-        this.selectedTickets = null;
-        this.selectedSeats = [];
+        this.clientName = name;
+        this.selectedMovie = movie;
+        this.selectedDay = day;
+        this.selectedTime = time;
+        this.selectedTickets = tickets;
+        this.selectedSeats = seats;
     }
     ClearSelections()
     {
@@ -42,10 +42,17 @@ playingMovies.push(new Movie(2, "Dia de la Independencia", "independence_day.jpg
 playingMovies.push(new Movie(3, "John Wick", "john_wick.jpg"));
 
 if (!localStorage.getItem("purchase")){
-    localStorage.setItem("purchase", JSON.stringify(new TicketPurchase()));
+    localStorage.setItem("purchase", JSON.stringify(new TicketPurchase(null, null, null, null, null, [])));
 }
 
-let ticketPurchase = JSON.parse(localStorage.getItem("purchase"));
+let purchase = JSON.parse(localStorage.getItem("purchase"));
+let ticketPurchase = new TicketPurchase(
+    purchase.clientName, 
+    purchase.selectedMovie, 
+    purchase.selectedDay, 
+    purchase.selectedTime, 
+    purchase.selectedTickets, 
+    purchase.selectedSeats);
 
 if (ticketPurchase.clientName !== null){
     continueWithPurchase();
@@ -315,7 +322,7 @@ function showSummary() {
 function reset() {
     ticketPurchase.ClearSelections();
     localStorage.setItem("purchase", JSON.stringify(ticketPurchase));
-    document.getElementById('content').innerHTML = '';
+    document.getElementById('content').innerHTML = ``;
     showWelcomeMessage();
 }
 
