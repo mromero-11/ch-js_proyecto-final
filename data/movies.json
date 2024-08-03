@@ -1,0 +1,67 @@
+[
+    {
+        "id": 1,
+        "title": "Volver al Futuro",
+        "image": "back_to_the_future.jpg",
+        "functions": [
+            {
+                "day": "VIERNES",
+                "times": ["20:00", "22:00"]
+            },
+            {
+                "day": "SABADO",
+                "times": ["16:00", "18:00", "20:00", "22:00"]
+            },
+            {
+                "day": "DOMINGO",
+                "times": ["16:00", "18:00", "20:00"]
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "title": "Dia de la Independencia",
+        "image": "independence_day.jpg",
+        "functions": [
+            {
+                "day": "JUEVES",
+                "times": ["20:00", "22:30"]
+            },
+            {
+                "day": "VIERNES",
+                "times": ["20:00", "22:30"]
+            },
+            {
+                "day": "SABADO",
+                "times": ["15:00", "17:30", "20:00", "22:30"]
+            },
+            {
+                "day": "DOMINGO",
+                "times": ["15:00", "17:30", "20:00"]
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "title": "John Wick",
+        "image": "john_wick.jpg",
+        "functions": [
+            {
+                "day": "JUEVES",
+                "times": ["18:00", "21:00", "00:00"]
+            },
+            {
+                "day": "VIERNES",
+                "times": ["18:00", "21:00", "00:00"]
+            },
+            {
+                "day": "SABADO",
+                "times": ["12:00", "15:00", "18:00", "21:00", "00:00"]
+            },
+            {
+                "day": "DOMINGO",
+                "times": ["12:00", "15:00", "18:00", "21:00", "00:00"]
+            }
+        ]
+    }
+]

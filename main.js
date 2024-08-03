@@ -2,16 +2,13 @@ const ID_DAY = "day";
 const ID_TIME = "time";
 const ID_TICKETS = "tickets";
 
-const DAYS = ["Jueves", "Viernes", "Sabado", "Domingo"];
-const TIMES = ["18:00", "20:00", "22:30"];
-const TICKETS = Array.from({ length: 4 }, (_, i) => i + 1);
-
 class Movie {
-    constructor(id, title, image)
+    constructor(id, title, image, functions)
     {
         this.id = id;
         this.title = title;
         this.image = image;
+        this.functions = functions;
     }
 }
 
@@ -37,28 +34,88 @@ class TicketPurchase {
 }
 
 let playingMovies = [];
-playingMovies.push(new Movie(1, "Volver al Futuro", "back_to_the_future.jpg"));
-playingMovies.push(new Movie(2, "Dia de la Independencia", "independence_day.jpg"));
-playingMovies.push(new Movie(3, "John Wick", "john_wick.jpg"));
+let ticketPurchase = null;
 
-if (!localStorage.getItem("purchase")){
-    localStorage.setItem("purchase", JSON.stringify(new TicketPurchase(null, null, null, null, null, [])));
+async function fetchMovies() {
+    try {
+        const response = await fetch('data/movies.json');
+        if (!response.ok) {
+            Swal.fire({
+                title: 'Info',
+                text: 'No encontramos peliculas disponibles.',
+                icon: 'info'
+              })
+        }
+
+        const data = await response.json();
+        
+        const movies = data.map(movieData => new Movie(
+            movieData.id,
+            movieData.title,
+            movieData.image,
+            movieData.functions
+        ));
+        
+        return movies;
+    } catch (error) {
+        Swal.fire({
+            title: 'Info',
+            text: 'No encontramos peliculas disponibles.',
+            icon: 'info'
+          })
+    }
 }
 
-let purchase = JSON.parse(localStorage.getItem("purchase"));
-let ticketPurchase = new TicketPurchase(
-    purchase.clientName, 
-    purchase.selectedMovie, 
-    purchase.selectedDay, 
-    purchase.selectedTime, 
-    purchase.selectedTickets, 
-    purchase.selectedSeats);
+async function getLocalStorage()
+{
+    if (!localStorage.getItem("purchase")){
+        localStorage.setItem("purchase", JSON.stringify(new TicketPurchase(null, null, null, null, null, [])));
+    }
 
-if (ticketPurchase.clientName !== null){
-    continueWithPurchase();
+    let purchase = JSON.parse(localStorage.getItem("purchase"));
+
+    ticketPurchase = new TicketPurchase(
+        purchase.clientName, 
+        purchase.selectedMovie, 
+        purchase.selectedDay, 
+        purchase.selectedTime, 
+        purchase.selectedTickets, 
+        purchase.selectedSeats
+    );
+    
+    return ticketPurchase;
 }
-else {
-    showWelcomeMessage();
+
+async function initializeApp() {
+    playingMovies = await fetchMovies();
+    if (playingMovies === null){
+        return;
+    }
+
+    ticketPurchase = await getLocalStorage();
+
+    if (ticketPurchase.clientName !== null){
+        Swal.fire({
+            title: "Tiene una compra en proceso. Desea continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Si, continuar compra",
+            confirmButtonColor: "#3085d6",
+            cancelButtonText: "No, iniciar nueva compra",
+            cancelButtonColor: "#d33"
+          }).then((result) => {
+            if (result.isConfirmed) {
+                continueWithPurchase();
+            }
+            else{
+                reset();
+            }
+          });
+        continueWithPurchase();
+    }
+    else {
+        showWelcomeMessage();
+    }
 }
 
 function continueWithPurchase()
@@ -132,12 +189,14 @@ function selectMovie(movieId) {
 function selectDay(day) {
     ticketPurchase.selectedDay = day;
     localStorage.setItem("purchase", JSON.stringify(ticketPurchase));
+    populateDropdown(ID_TIME, 'Selecciona un horario', ticketPurchase.selectedMovie.functions.find(func => func.day === day).times, selectTime);
     enableDropdown(ID_TIME);
 }
 
 function selectTime(time) {
     ticketPurchase.selectedTime = time;
     localStorage.setItem("purchase", JSON.stringify(ticketPurchase));
+    populateDropdown(ID_TICKETS, 'Selecciona cantidad de entradas', Array.from({ length: 4 }, (_, i) => i + 1), selectTickets);
     enableDropdown(ID_TICKETS);
 }
 
@@ -147,7 +206,10 @@ function selectTickets(tickets) {
     showSeatsMap();
 }
 
-function createDropdown(id, title, options, callback) {
+function updateContentWithDropdown(id, title) {
+    let content = document.getElementById('functions-info');
+    let dropdownsContainer = document.getElementById('dropdowns-container');
+    
     let dropdownDiv = document.createElement('div');
     dropdownDiv.id = `dropdown-${id}`;
     dropdownDiv.className = 'dropdown';
@@ -159,6 +221,23 @@ function createDropdown(id, title, options, callback) {
     dropdownButton.setAttribute('data-bs-toggle', 'dropdown');
     dropdownButton.setAttribute('aria-expanded', 'false');
     dropdownButton.innerText = title;
+
+    dropdownDiv.appendChild(dropdownButton);
+    dropdownsContainer.appendChild(dropdownDiv);
+    content.appendChild(dropdownsContainer);
+}
+
+function populateDropdown(id, title, options, callback)
+{
+    let dropdownDiv = document.getElementById(`dropdown-${id}`);
+
+    let dropdownButton = document.getElementById(`dropdown-btn-${id}`);
+    dropdownButton.innerText = title;
+
+    let oldDropdownMenu = document.getElementById(`dropdown-menu-${id}`);
+    if (oldDropdownMenu) {
+        oldDropdownMenu.remove();
+    }
 
     let dropdownMenu = document.createElement('ul');
     dropdownMenu.id = `dropdown-menu-${id}`;
@@ -177,21 +256,10 @@ function createDropdown(id, title, options, callback) {
             callback(option);
         };
         dropdownListItem.appendChild(dropdownItem);
-        dropdownMenu.appendChild(dropdownItem);
+        dropdownMenu.appendChild(dropdownListItem);
     });
 
-    dropdownDiv.appendChild(dropdownButton);
     dropdownDiv.appendChild(dropdownMenu);
-
-    return dropdownDiv;
-}
-
-function updateContentWithDropdown(id, title, options, callback) {
-    let content = document.getElementById('functions-info');
-    let dropdownsContainer = document.getElementById('dropdowns-container');
-    let dropdown = createDropdown(id, title, options, callback);
-    dropdownsContainer.appendChild(dropdown);
-    content.appendChild(dropdownsContainer);
 }
 
 function enableDropdown(id)
@@ -216,14 +284,14 @@ function setDropdownValue(dropdownButtonId, value) {
     }
 }
 
-function updateContentWithCard()
+function updateContentWithCard(movieTitle, movieImage)
 {
     let movieDiv = document.getElementById('movie-info');
     movieDiv.innerHTML = `
         <div class="card">
-            <img class="card-img-top" src="img/${ticketPurchase.selectedMovie.image}" alt="${ticketPurchase.selectedMovie.title}">
+            <img class="card-img-top" src="img/${movieImage}" alt="${movieTitle}">
             <div class="card-body">
-                <h5 class="card-title">${ticketPurchase.selectedMovie.title}</h5>
+                <h5 class="card-title">${movieTitle}</h5>
             </div>
         </div>
     `;
@@ -243,14 +311,17 @@ function showFunctions()
     let functionsDiv = document.createElement('div');
     functionsDiv.id = 'functions-info';
     functionsDiv.className = 'col-md-5';
-    functionsDiv.innerHTML = `<h4>Selecciona dia, horario y cantidad de entradas</h4>`;
+    functionsDiv.innerHTML = `<h4>Selecciona la función y la cantidad de entradas</h4>`;
     functionsDiv.innerHTML += '<div id="dropdowns-container"></div>';
     content.appendChild(functionsDiv);
 
-    updateContentWithCard();
-    updateContentWithDropdown(ID_DAY, 'Selecciona un dia', DAYS, selectDay);
-    updateContentWithDropdown(ID_TIME, 'Selecciona un horario', TIMES, selectTime);
-    updateContentWithDropdown(ID_TICKETS, 'Selecciona cantidad de entradas', TICKETS, selectTickets);
+    updateContentWithCard(ticketPurchase.selectedMovie.title, ticketPurchase.selectedMovie.image);
+
+    updateContentWithDropdown(ID_DAY, 'Selecciona un dia');
+    updateContentWithDropdown(ID_TIME, 'Selecciona un horario');
+    updateContentWithDropdown(ID_TICKETS, 'Selecciona cantidad de entradas');
+
+    populateDropdown(ID_DAY, 'Selecciona un dia', ticketPurchase.selectedMovie.functions.map(func => func.day), selectDay);
 }
 
 function showSeatsMap() {
@@ -293,7 +364,12 @@ function handleSeatSelection(event) {
             localStorage.setItem("purchase", JSON.stringify(ticketPurchase));
         } else {
             event.target.checked = false;
-            alert(`Solo puede seleccionar ${ticketPurchase.selectedTickets} asientos.`);
+            Swal.fire({
+                icon: "error",
+                title: `Solo puede seleccionar ${ticketPurchase.selectedTickets} asientos.`,
+                showConfirmButton: false,
+                timer: 2000
+              });
         }
     } else {
         if (index > -1) {
@@ -328,5 +404,13 @@ function reset() {
 
 function confirm() {
     document.getElementById('content').innerHTML = `<h3>Gracias por su compra ${ticketPurchase.clientName}! Disfrute de la pelicula!</h3>`;
-    setTimeout(reset, 3000);
+    setTimeout(reset, 2000);
+    Swal.fire({
+        icon: "success",
+        title: "Compra confirmada!",
+        showConfirmButton: false,
+        timer: 1500
+      });
 }
+
+initializeApp();
